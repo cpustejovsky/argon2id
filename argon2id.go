@@ -89,26 +89,22 @@ type Params struct {
 // derived key prefixed by the salt and parameters. It looks like this:
 //
 //	$argon2id$v=19$m=65536,t=3,p=2$c29tZXNhbHQ$RdescudvJCsgt3ub+b+dWRWJTmaaJObG
-func CreateHash[T interface{ string | []byte }](password T, params *Params) (hash string, err error) {
-	salt, err := generateRandomBytes(params.SaltLength)
-	if err != nil {
-		return "", err
-	}
+func CreateHash[T string | []byte](password T, params *Params) string {
+	salt := generateRandomBytes(params.SaltLength)
 
 	key := argon2.IDKey([]byte(password), salt, params.Iterations, params.Memory, params.Parallelism, params.KeyLength)
 
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
 	b64Key := base64.RawStdEncoding.EncodeToString(key)
 
-	hash = fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, params.Memory, params.Iterations, params.Parallelism, b64Salt, b64Key)
-	return hash, nil
+	return fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, params.Memory, params.Iterations, params.Parallelism, b64Salt, b64Key)
 }
 
 // ComparePasswordAndHash performs a constant-time comparison between a
 // plain-text password and Argon2id hash, using the parameters and salt
 // contained in the hash. It returns true if they match, otherwise it returns
 // false.
-func ComparePasswordAndHash[T interface{ string | []byte }](password T, hash string) (match bool, err error) {
+func ComparePasswordAndHash[T string | []byte](password T, hash string) (match bool, err error) {
 	match, _, err = CheckHash(password, hash)
 	return match, err
 }
@@ -116,7 +112,7 @@ func ComparePasswordAndHash[T interface{ string | []byte }](password T, hash str
 // CheckHash is like ComparePasswordAndHash, except it also returns the params that the hash was
 // created with. This can be useful if you want to update your hash params over time (which you
 // should).
-func CheckHash[T interface{ string | []byte }](password T, hash string) (match bool, params *Params, err error) {
+func CheckHash[T string | []byte](password T, hash string) (match bool, params *Params, err error) {
 	params, salt, key, err := DecodeHash(hash)
 	if err != nil {
 		return false, nil, err
@@ -124,26 +120,16 @@ func CheckHash[T interface{ string | []byte }](password T, hash string) (match b
 
 	otherKey := argon2.IDKey([]byte(password), salt, params.Iterations, params.Memory, params.Parallelism, params.KeyLength)
 
-	keyLen := int32(len(key))
-	otherKeyLen := int32(len(otherKey))
-
-	if subtle.ConstantTimeEq(keyLen, otherKeyLen) == 0 {
-		return false, params, nil
-	}
 	if subtle.ConstantTimeCompare(key, otherKey) == 1 {
 		return true, params, nil
 	}
 	return false, params, nil
 }
 
-func generateRandomBytes(n uint32) ([]byte, error) {
+func generateRandomBytes(n uint32) []byte {
 	b := make([]byte, n)
-	_, err := rand.Read(b)
-	if err != nil {
-		return nil, err
-	}
-
-	return b, nil
+	_, _ = rand.Read(b)
+	return b
 }
 
 // DecodeHash expects a hash created from this package, and parses it to return the params used to

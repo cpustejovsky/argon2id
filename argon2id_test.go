@@ -12,19 +12,13 @@ func TestCreateHash(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hash1, err := CreateHash("pa$$word", DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash1 := CreateHash("pa$$word", DefaultParams)
 
 	if !hashRX.MatchString(hash1) {
 		t.Errorf("hash %q not in correct format", hash1)
 	}
 
-	hash2, err := CreateHash("pa$$word", DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash2 := CreateHash("pa$$word", DefaultParams)
 
 	if strings.Compare(hash1, hash2) == 0 {
 		t.Error("hashes must be unique")
@@ -37,24 +31,15 @@ func TestCreateHashBytes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	password, err := generateRandomBytes(16)
-	if err != nil {
-		t.Fatal(err)
-	}
+	password := generateRandomBytes(16)
 
-	hash1, err := CreateHash(password, DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash1 := CreateHash(password, DefaultParams)
 
 	if !hashRX.MatchString(hash1) {
 		t.Errorf("hash %q not in correct format", hash1)
 	}
 
-	hash2, err := CreateHash(password, DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash2 := CreateHash(password, DefaultParams)
 
 	if strings.Compare(hash1, hash2) == 0 {
 		t.Error("hashes must be unique")
@@ -62,10 +47,7 @@ func TestCreateHashBytes(t *testing.T) {
 }
 
 func TestComparePasswordAndHash(t *testing.T) {
-	hash, err := CreateHash("pa$$word", DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := CreateHash("pa$$word", DefaultParams)
 
 	match, err := ComparePasswordAndHash("pa$$word", hash)
 	if err != nil {
@@ -89,15 +71,9 @@ func TestComparePasswordAndHash(t *testing.T) {
 const bugHash = "$argon2id$v=19$m=65536,t=1,p=2$UDk0zEuIzbt0x3bwkf8Bgw$ihSfHWUJpTgDvNWiojrgcN4E0pJdUVmqCEdRZesx9tE"
 
 func TestComparePasswordAndHashBytes(t *testing.T) {
-	password, err := generateRandomBytes(16)
-	if err != nil {
-		t.Fatal(err)
-	}
+	password := generateRandomBytes(16)
 
-	hash, err := CreateHash(password, DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := CreateHash(password, DefaultParams)
 
 	match, err := ComparePasswordAndHash(password, hash)
 	if err != nil {
@@ -108,10 +84,7 @@ func TestComparePasswordAndHashBytes(t *testing.T) {
 		t.Error("expected password and hash to match")
 	}
 
-	otherPassword, err := generateRandomBytes(16)
-	if err != nil {
-		t.Fatal(err)
-	}
+	otherPassword := generateRandomBytes(16)
 
 	match, err = ComparePasswordAndHash(otherPassword, hash)
 	if err != nil {
@@ -124,10 +97,7 @@ func TestComparePasswordAndHashBytes(t *testing.T) {
 }
 
 func TestDecodeHash(t *testing.T) {
-	hash, err := CreateHash("pa$$word", DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := CreateHash("pa$$word", DefaultParams)
 
 	params, _, _, err := DecodeHash(hash)
 	if err != nil {
@@ -157,15 +127,9 @@ func TestDecodeHash(t *testing.T) {
 }
 
 func TestDecodeHashBytes(t *testing.T) {
-	password, err := generateRandomBytes(16)
-	if err != nil {
-		t.Fatal(err)
-	}
+	password := generateRandomBytes(16)
 
-	hash, err := CreateHash(password, DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := CreateHash(password, DefaultParams)
 
 	params, _, _, err := DecodeHash(hash)
 	if err != nil {
@@ -177,10 +141,7 @@ func TestDecodeHashBytes(t *testing.T) {
 }
 
 func TestCheckHash(t *testing.T) {
-	hash, err := CreateHash("pa$$word", DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := CreateHash("pa$$word", DefaultParams)
 
 	ok, params, err := CheckHash("pa$$word", hash)
 	if err != nil {
@@ -195,15 +156,9 @@ func TestCheckHash(t *testing.T) {
 }
 
 func TestCheckHashBytes(t *testing.T) {
-	password, err := generateRandomBytes(16)
-	if err != nil {
-		t.Fatal(err)
-	}
+	password := generateRandomBytes(16)
 
-	hash, err := CreateHash(password, DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := CreateHash(password, DefaultParams)
 
 	ok, params, err := CheckHash(password, hash)
 	if err != nil {
